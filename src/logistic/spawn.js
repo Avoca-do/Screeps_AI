@@ -33,22 +33,42 @@ const spawn_creep = require('./logistic.spawn_logic.get_order');
 const helper = require('./logistic.spawn_logic.helpers')
 const reinforcement = require('./memory.reinforcement')
 
+
+const safety_check = function(room){
+    let miners = room.memory.miners;
+    let sm = room.find(FIND_MY_CREEPS, { filter : c => c.memory.role == 'miner' }).length;
+    //console.log(sm);
+    if((!Game.creeps[miners[0]] || !Game.creeps[miners[1]]) && sm < 2){   
+        if(room.memory.spawn_queue.length == 0){
+            if(Game.creeps[miners[0]] || Game.creeps[miners[1]])
+            {
+                if(room.find(FIND_MY_CREEPS, { filter : c => c.memory.role == 'transferer' }).length == 0){
+
+                    const args = {
+                        memory : {
+                            role : 'transferer',
+                        },
+                        max_energy : 800
+                    }
+                    room.memory.spawn_queue.unshift(args);
+                    return;
+                }
+            }
+            const args = {
+                memory : {
+                    role : 'miner',
+                },
+                max_energy : 1000
+            }
+            room.memory.spawn_queue.unshift(args);
+        }
+    }
+}
+
 module.exports = {
     /** @param {Room} room **/
     run : function(room){
-        let miners = room.memory.miners;
-        if(!Game.creeps[miners[0]] || !Game.creeps[miners[1]]){
-            if(room.memory.spawn_queue.length == 0){
-                const args = {
-                    memory : {
-                        role : 'miner',
-                    },
-                    max_energy : 1000
-                }
-                room.memory.spawn_queue.unshift(args);
-            }
-        }
-
+        safety_check(room);
         let spawn = get_spawn(room);
         if(!spawn)
             return;
