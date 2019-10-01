@@ -2,10 +2,12 @@ module.exports = {
 
     control: function(){
         for(let name in Game.rooms){
-            let towers = Game.rooms[name].find(FIND_MY_STRUCTURES, {
+            let room = Game.rooms[name];
+            if(!room.controller.my)
+                continue;
+            let towers = room.find(FIND_MY_STRUCTURES, {
                 filter : (s) => s.structureType == STRUCTURE_TOWER
             });
-
             if(!Memory.underAttack){
                 for(let tname in towers){
                     /** @param {StructureTower} tower **/
@@ -47,19 +49,14 @@ module.exports = {
                     //onsole.log(repairTarget + " . " + utime);
                 }
             }else{
-                console.log("?!!!! under ATTACK!!!!!");
-                //////////FIX TO MUCH ROOMS IN GAME
-                //console.log(name);
-                var attackers = Game.spawns['Spawn1'].room.find(FIND_HOSTILE_CREEPS);
+                console.log("?!!?!?!", room);
+                var attackers = room.find(FIND_HOSTILE_CREEPS);
                 if(attackers.length > 0){
                     for(let tname in towers){
                         let tower = towers[tname];
                         let target = tower.pos.findClosestByRange(attackers);
                         tower.attack(target);
                     }
-                }else{
-                    console.log("wat" + attackers.length);
-                    Memory.underAttack = false;
                 }
             }
         }

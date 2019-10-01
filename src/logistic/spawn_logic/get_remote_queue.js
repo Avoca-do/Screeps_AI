@@ -7,7 +7,7 @@ const roles = {
 }
 const sr = ['harvester', 'upgrader'];
 
-const rooms = ['E48N29', 'E49N28', 'E48N28'];
+const rooms = ['E48N29', 'E49N28' ]//, 'E48N28'];
 
 module.exports = { 
 
@@ -48,6 +48,10 @@ module.exports = {
             let response = outside_repairer_s(rooms[t]);
             if(response)
                 return response;
+            console.log(num);
+            if(num > 4){
+                return;
+            }
         }
 
         if(hr[t] > ur[t]){
@@ -64,8 +68,6 @@ module.exports = {
             }
         }
     }
-
-
 }
 
 const outside_repairer_s = function(room_name){

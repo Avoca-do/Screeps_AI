@@ -12,9 +12,10 @@ module.exports = {
                 creep.setTask(constants.HARVEST);
             }
         }else if(task == constants.HARVEST){
-            //console
-            if(creep.run_task('withdraw')){
-                creep.setTask(constants.WORK);
+            if(!creep.run_task('pickup_all')){
+                if(creep.run_task('smart_withdraw')){
+                    creep.setTask(constants.WORK);
+                }
             }
         }else{
             creep.setTask(constants.WORK);

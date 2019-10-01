@@ -17,9 +17,10 @@ module.exports = {
                     {
                         creep.memory.task = MINE;
                         break;
+                    }else if(Game.creeps[name].ticksToLive > 75){
+                        continue;
                     }
                     //console.log("no target :'(")
-                    continue;
                 }
                 let container = source.pos.findInRange(FIND_STRUCTURES, 1, {
                     filter : (s) => s.structureType == STRUCTURE_CONTAINER
@@ -67,19 +68,23 @@ module.exports = {
             }
 
             if(creep.ticksToLive < 75 && !creep.memory.replacement){
-                let mn = creep.room.energyCapacityAvailable * 0.5;
-                if(mn > 800)
-                    mn = 800;
-                const args = {
-                    memory : {
-                        role : 'miner',
-                    },
-                    max_energy : 1000,
-                    min_energy : mn,
+                let sum = _.sum(creep.room.memory.spawn_queue, q => q.memory.role == 'miner');
+                console.log("????????");
+                if(sum == 0){
+                    let mn = creep.room.energyCapacityAvailable * 0.5;
+                    if(mn > 800)
+                        mn = 800;
+                    const args = {
+                        memory : {
+                            role : 'miner',
+                        },
+                        max_energy : 1000,
+                        min_energy : mn,
+                    }
+                    creep.room.memory.spawn_queue.push(args);
+                    creep.memory.replacement = true;
+                    console.log('called for replacement!');
                 }
-                creep.room.memory.spawn_queue.unshift(args);
-                creep.memory.replacement = true;
-                console.log('called for replacement!');
             }
             //console.log('hmmmmmm mining! ' + creep.memory.tid);
         }else{

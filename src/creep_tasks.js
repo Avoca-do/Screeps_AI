@@ -24,6 +24,8 @@ const tasks = {
     pickup : require('./creep_tasks.pickup'),
     invade : require('./creep_tasks.invade'),
     get_attack_target : require('./creep_tasks.get_attack_target'),
+    pickup_all : require('./creep_tasks.pickup_all'),
+    smart_withdraw : require('./creep_tasks.smart_withdraw'),
 }
 
 module.exports = function(){

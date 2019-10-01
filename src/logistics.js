@@ -3,6 +3,8 @@ const containers = require('./logistic.containers')
 const spawn_logistic = require('./logistic.spawn');
 const room_build = require('./logistic.buildings');
 
+const base = require('./logistic.room_planner.room_constractor')
+
 /** @param {Room} room **/
 const initRoom = function(room){
     if(!room.memory.initialized){
@@ -23,8 +25,12 @@ module.exports = {
         let roles_remote = {};
         for(let name in Game.rooms){
             let room = Game.rooms[name];
-            if(room.controller.my){
-                initRoom(room);
+            if(!room.controller.my)
+                continue;
+            initRoom(room);
+            base.init(room);
+            if(!room.memory.planner.disabled){ 
+                base.loop(room);
             }
             //console.log(room);
             //console.log(Game.cpu.getUsed() + " ms");  
@@ -37,30 +43,16 @@ module.exports = {
             if(!Game.creeps[name]){
                 let task = Memory.creeps[name].task;
                 delete Memory.creeps[name];
-                //console.log('Clearing non-existing creep memory:', name);
             }
-            // else{
-            //     let role = Memory.creeps[name].role;
-            //     let remote = Memory.creeps[name].remote;
-            //     if(remote){
-            //         if(!roles_remote[role]){
-            //             roles_remote[role] = 1;
-            //         }else{
-            //             roles_remote[role]++;
-            //         }
-            //     }else{
-                    
-            //         if(!roles[role]){
-            //             roles[role] = 1;
-            //         }else{
-            //             roles[role]++;
-            //         }
-            //     }
-            // }
         } 
         spawn_logistic.run(room);
-        spawn_logistic.run(Game.rooms['E47N29']);
-        initRoom(room);
+        let rm2 = Game.rooms['E47N29'];
+
+        spawn_logistic.run(rm2);
+
+        //base.init(room);
+        //base.loop(room);
+
         //containers.run(Game.rooms["E49N29"]);
 
         let args = Memory.args;

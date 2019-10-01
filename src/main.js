@@ -13,6 +13,8 @@ var towerControll = require('./towerController');
 var longDistc = require('./role.helper.longDistanceCreep');
 var logistics = require('./logistics');
 var helper = require('./role.helper.helper');
+
+require('./logistic.room_planner.draw_layout');
 //import "./consts/CONSTANTS"
 
 const roles = {
@@ -45,22 +47,38 @@ module.exports.loop = function () {
     //console.log(TESSSSSSSSSSSSSSSST);
     //console.log(TESSSSSSSSSSSSSSSST);
     //console.log(Game.cpu.getUsed());
+
     var spawn = Game.spawns['Spawn1'];
+
     //Memory.army['lel'] = 1;
     // console.log(Memory.army['lel']);
     towerControll.control();
     let frame = Game.time % 7;
+    try{
+        // drawLayout(Game.spawns['Spawn1'].room, false);
+        // drawRoads(Game.spawns['Spawn1'].room);
+
+        // drawLayout(Game.spawns['Spawn2'].room, false);
+        // drawRoads(Game.spawns['Spawn2'].room);
+    }catch(error){
+        
+    }
 
     //console.log(Game.map.findExit(spawn.room, 'E51N29') + ' exit ?!');
     if(frame == 0){
         //console.log(Game.cpu.getUsed() + "me");
         //spawner.run(Game.spawns['Spawn1'], roles);
-        var attackers = spawn.room.find(FIND_HOSTILE_CREEPS);
+        var attackers = 0;
+        for(let i in Game.spawns){
+            attackers += Game.spawns[i].room.find(FIND_HOSTILE_CREEPS).length;
+        }
 
-        if(attackers.length > 0){
+        if(attackers > 0){
             console.log("?!222222222!!! under ATTACK!!!!!");
             Memory.underAttack = true;
-            //spawn.room.controller.activateSafeMode();
+        }else{
+            console.log("?SDSDS");
+            Memory.underAttack = false;
         }
     }else if(frame == 1){
         logistics.run();

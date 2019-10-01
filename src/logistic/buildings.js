@@ -61,7 +61,7 @@ module.exports = {
         let spawns = room.find(FIND_MY_SPAWNS);
 
         if(room.memory.harvest){
-            if(room.find(FIND_MY_CREEPS, { filter : c => c.memory.role == 'harvester' }) < 2){
+            if(room.find(FIND_MY_CREEPS, { filter : c => c.memory.role == 'harvester' }) < 1){
                 if(room.memory.spawn_queue.length == 0){
                     const args = {
                         memory : {
@@ -71,6 +71,10 @@ module.exports = {
                     }
                     room.memory.spawn_queue.unshift(args);
                 }
+            }
+            console.log(room.energyCapacityAvailable);
+            if(room.energyCapacityAvailable > 780){
+                room.memory.harvest = false;
             }
         }
 

@@ -1,6 +1,7 @@
 const upgrade_task = require('./creep_tasks.upgrade')
 
 module.exports = {
+    /** @param {Creep} creep **/
     run : function(creep){
         let structure = Game.getObjectById(creep.memory.tid);
         let utime = Game.time - creep.memory.rt;
@@ -12,10 +13,19 @@ module.exports = {
                     filter :(s) => ( s.structureType == STRUCTURE_EXTENSION 
                         || s.structureType == STRUCTURE_SPAWN 
                         || s.structureType == STRUCTURE_TOWER)
-                        && s.energy < s.energyCapacity
+                        && s.energy < s.energyCapacity * 0.9
                 }).sort((a, b) => ((a.energy + 10) / a.energyCapacity) - ((b.energy + 10)/ b.energyCapacity));
+
                 structure = structure.slice(0, structure.length * 0.75 + 1);
                 structure = creep.pos.findClosestByPath(structure);
+                if(!structure){
+                    structure = creep.room.find(FIND_STRUCTURES, {
+                        filter : (s) => s.structureType == STRUCTURE_LINK && s.energy < s.energyCapacity * 0.75 
+                    });
+                    if(creep.room.storage)
+                        structure.push(creep.room.storage)
+                    structure = creep.pos.findClosestByPath(structure);
+                }
             
                 if(structure){
                     //console.log('wtf?' + structure);

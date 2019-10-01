@@ -1,8 +1,8 @@
 const body_types = {
-    miner : [[WORK], 0.14],
-    transferer : [[CARRY], 0.5],
-    normal : [[CARRY, WORK], 1],
-    remote : [[CARRY, CARRY, WORK], 1],
+    miner : { scalable : [WORK], movement : 0.14, fixed : [CARRY, CARRY],},
+    transferer : { scalable : [CARRY], movement : 1, fixed : [],},
+    normal : { scalable : [CARRY, WORK], movement : 1, fixed : [],},
+    remote : { scalable : [CARRY, CARRY, WORK], movement : 2, fixed : [],},
 }
 
 const creeps = {
@@ -11,13 +11,13 @@ const creeps = {
     repairer :  body_types.normal,
     builder :  body_types.normal,
     upgrader :  body_types.normal,
-    reserver : [[CLAIM], 0.7],
+    reserver : { scalable : [CLAIM], movement : 1, fixed : []},
     harvester : body_types.normal,
     outside_repairer : body_types.normal,
-    ranger : [[TOUGH, TOUGH, TOUGH, RANGED_ATTACK, RANGED_ATTACK], 10],
-    attacker : [[TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, ATTACK, ATTACK], 10],
-    healer : [[TOUGH, TOUGH, TOUGH, TOUGH, HEAL, HEAL, HEAL], 8],
-    conqueror : [[TOUGH, TOUGH, CLAIM, CLAIM], 4],
+    ranger : { scalable : [TOUGH, TOUGH, TOUGH, RANGED_ATTACK, RANGED_ATTACK], movement : 10, fixed : [],},
+    attacker : { scalable : [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, ATTACK, ATTACK], movement : 10, fixed : [],},
+    healer : { scalable : [TOUGH, TOUGH, TOUGH, TOUGH, HEAL, HEAL, HEAL], movement : 8, fixed : []},
+    conqueror : { scalable : [TOUGH, TOUGH, CLAIM, CLAIM], movement : 4, fixed : []},
 }
 
 const SpawnCreature = (spawn, body, memory)=>{
@@ -60,33 +60,27 @@ module.exports = function(spawn ,args){
     if(args.max_energy){
         energy = energy < args.max_energy ? energy : args.max_energy;
     }
-    let body = createBody(energy, body_type[0], mv);
+
+    if(args.memory.role == 'miner'){
+        
+    }
+    let body = createBody(energy, body_type);
     let response = SpawnCreature(spawn, body, creep_memory);
     if(response == 0){
-        console.log('spawning' , JSON.stringify(args));
+        //console.log('spawning' , JSON.stringify(args));
         return response;
     }
     return response;
 }
 
-
-
-const get_spawn = (room)=>{
-    let spawns = room.find(FIND_MY_SPAWNS, {
-        filter : (s) => !s.spawning,
-    });
-    if(spawns.length > 0){
-        return spawns[0];
-    }
-    return null;
-}
-
-const createBody = (energy, body_parts, moveRatio) => {
+const createBody = (energy, body_configuration) => {
     let body = [];
-
+    body_parts = body_configuration.scalable;
+    moveRatio = body_configuration.movement;
     if(moveRatio < 1){
+        let ac = bodyCost(body_configuration.fixed);
         let scost = bodyCost(body_parts);
-        let mr = Math.floor((energy - 50) / scost);
+        let mr = Math.floor((energy - 50 - ac) / scost);
         if(mr < 1)
             mr = 1;
         let ratio = 1 / moveRatio;
@@ -103,6 +97,7 @@ const createBody = (energy, body_parts, moveRatio) => {
         }
         body = body.concat(body_parts);
     }
+    body = body.concat(body_configuration.fixed);
     let cost = bodyCost(body);
     if(cost > energy){
         return body;
@@ -112,7 +107,7 @@ const createBody = (energy, body_parts, moveRatio) => {
     for(let i = 0; i < numDuplicate; i++){
         ebody = ebody.concat(body);
     }
-    console.log('createBody f', body, cost, energy, numDuplicate, bodyCost(ebody));
+    //console.log('createBody f', body, cost, energy, numDuplicate, bodyCost(ebody));
     ebody.sort();
     ebody = ebody.reverse();
     return ebody;

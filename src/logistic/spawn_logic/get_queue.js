@@ -1,8 +1,7 @@
 const roles = {
-    transferer : [2 , 8],
     repairer : [1 , 3],
-    builder : [1 , 4],
-    upgrader : [3, 6],
+    builder : [2 , 4],
+    upgrader : [2, 6],
 }
 
 const min_energy_c = 1200;
@@ -16,9 +15,8 @@ module.exports = {
         if(min_energy > min_energy_c)
             min_energy = min_energy_c;
         let priority = 10;
-        let transferers = _.sum(Game.creeps, (c) => c.memory.role == 'transferer');
-        //console.log(transferers + ' t');
-        if(transferers < 1){
+        let transferers = _.sum(Game.creeps, (c) => c.memory.role == 'transferer' && c.memory.home == room.name);
+        if(transferers < room.memory.roles.transferers){
             return {
                 role : 'transferer'
             }
@@ -27,7 +25,7 @@ module.exports = {
         if(room.energyAvailable >= min_energy){
             //console.log("?");
             let queue = undefined;
-            console.log('spawn stats room -', room.name)
+            //console.log('spawn stats room -', room.name)
             for(let role in roles){
                 //let ir = mroles[role];
                 let ir = _.sum(Game.creeps, (c) => !c.memory.remote && 
@@ -42,7 +40,7 @@ module.exports = {
                     rv = 0;
                 let nm = roles[role][0] - rv;
                 nm = nm < 1 ? 1 : nm;
-                console.log(nm + " - " + role + ' q - ' + ir);
+                //console.log(nm + " - " + role + ' q - ' + ir);
                 if(nm > ir){
                     let qpriority = (ir + 1) / roles[role][1];
                     if(qpriority < priority){

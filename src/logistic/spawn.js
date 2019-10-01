@@ -5,7 +5,7 @@
 //Game.spawns['Spawn1'].room.memory.spawn_queue.push({ memory : { role: 'upgrader', helper: true, home: 'E47N29'} , max_energy : 350 });
 //Memory.args = { unit: true, command : "conquer", name:'A1', target: 'E47N29' }
 
-
+//Game.spawns['Spawn1'].room.memory.spawn_queue.push({ memory : { role: 'ranger', unit : 'E48N29'} , min_energy : 800 });
 const body_types = {
     miner : [[WORK], 0.15],
     transferer : [[CARRY], 0.5],
@@ -39,28 +39,34 @@ const safety_check = function(room){
     let sm = room.find(FIND_MY_CREEPS, { filter : c => c.memory.role == 'miner' }).length;
     //console.log(sm);
     if((!Game.creeps[miners[0]] || !Game.creeps[miners[1]]) && sm < 2){   
-        if(room.memory.spawn_queue.length == 0){
-            if(Game.creeps[miners[0]] || Game.creeps[miners[1]])
-            {
-                if(room.find(FIND_MY_CREEPS, { filter : c => c.memory.role == 'transferer' }).length == 0){
-
-                    const args = {
-                        memory : {
-                            role : 'transferer',
-                        },
-                        max_energy : 800
-                    }
-                    room.memory.spawn_queue.unshift(args);
-                    return;
+        if(room.find(FIND_MY_CREEPS, { filter : c => c.memory.role == 'transferer' }).length == 0){
+            let sum = _.sum(room.memory.spawn_queue, q => q.memory.role == 'transferer');
+            if(sum < 1){
+                const args = {
+                    memory : {
+                        role : 'transferer',
+                    },
+                    max_energy : 600
+                }
+                room.memory.spawn_queue.unshift(args);
+                return;
+            }
+        }else{
+            let queue = room.memory.spawn_queue;
+            if(queue.length == 0){
+                const args = {
+                    memory : {
+                        role : 'miner',
+                    },
+                    max_energy : 1000
+                }
+                queue.unshift(args);
+            }else{
+                let q1 = queue[0];
+                if(q1.min_energy || q1.memory.role != 'miner'){
+                    queue = {};
                 }
             }
-            const args = {
-                memory : {
-                    role : 'miner',
-                },
-                max_energy : 1000
-            }
-            room.memory.spawn_queue.unshift(args);
         }
     }
 }
@@ -68,10 +74,10 @@ const safety_check = function(room){
 module.exports = {
     /** @param {Room} room **/
     run : function(room){
-        safety_check(room);
         let spawn = get_spawn(room);
         if(!spawn)
             return;
+        safety_check(room);
         //if there is creeps in queue spawn them first!
         let queue_list = room.memory.spawn_queue;
         if(queue_list.length > 0){
@@ -103,7 +109,7 @@ module.exports = {
                     memory : creep_settings,
                 }
                 if(creep_settings.role == 'transferer'){
-                    args.max_energy = 800;
+                    args.max_energy = 600;
                 }
                 let response = spawn_creep(spawn, args);
                 if(response == 0){
@@ -111,7 +117,14 @@ module.exports = {
                     return;
                 }
             }else{
-                if(room.energyCapacityAvailable < 600){
+                let cap = room.energyCapacityAvailable;
+                console.log("HMM HMMM trying to spawn?", room.name);
+                if(cap > 2100)
+                    cap = 2100;
+                if(cap < 600){
+                    return;
+                }else if(room.energyAvailable < cap * 0.9){
+                    console.log(room.energyAvailable, cap * 0.9);
                     return;
                 }
                 let creep_settings = get_queue_remote.get();
