@@ -8,32 +8,33 @@ module.exports = {
     /** @param {Creep} creep **/
     run : function(creep, task){
         if(task == constants.CONTINUE){
+            if(creep.room.controller.level < 5){
+                creep.memory.role = 'miner';
+                return;
+            }
             let sources = creep.room.find(FIND_SOURCES);
-            let found = true;
             for(let i in sources){
                 let name = creep.room.memory.miners[i];
                 let source = sources[i];
-                found = true;
                 if(Game.creeps[name]){
                     if(name == creep.name)
                     {
                         creep.memory.task = MINE;
                         break;
                     }else if(Game.creeps[name].ticksToLive > 75){
-                        found = false;
                         continue;
                     }
                     //console.log("no target :'(")
                 }
-                let container = source.pos.findInRange(FIND_STRUCTURES, 1, {
-                    filter : (s) => s.structureType == STRUCTURE_CONTAINER
+                let link = source.pos.findInRange(FIND_STRUCTURES, 2, {
+                    filter : (s) => s.structureType == STRUCTURE_LINK
                 });
-                if(container.length > 0){
+                if(link.length > 0){
                     creep.room.memory.miners[i] = creep.name;
-                    creep.memory.tid = container[0].pos;
+                    creep.memory.tid = link[0].pos;
                     creep.memory.source = source.id;
                     creep.memory.task = MINE;
-                    console.log('found a container!' + creep.memory.tid );
+                    console.log('found a link!' + creep.memory.tid );
                     break;
                 }else{
                     let cc = source.pos.findInRange(FIND_CONSTRUCTION_SITES, 1, {
@@ -62,38 +63,26 @@ module.exports = {
                     }
                 }
             }
-            if(found){
-                let pos = creep.memory.tid;
-                let link = creep.room.getPositionAt(pos.x, pos.y).findInRange(FIND_STRUCTURES, 1, {
-                    filter : (c) => c.structureType == STRUCTURE_LINK,
-                })
-                if(link.length > 0){
-                    creep.memory.lid = link[0].id;
-                }
-            }
         }else if(task == MINE){
             let pos = creep.memory.tid;
             if(creep.pos.getRangeTo(pos.x, pos.y) > 0){
                 creep.moveTo(pos.x, pos.y);
             }else{
                 creep.harvest(Game.getObjectById(creep.memory.source));
-                let link = Game.getObjectById(creep.memory.lid);
-                if(link && creep.carry.energy > 50){
-                    creep.transfer(link, RESOURCE_ENERGY);
-                }
             }
 
             if(creep.ticksToLive < 75 && !creep.memory.replacement){
                 let sum = _.sum(creep.room.memory.spawn_queue, q => q.memory.role == 'miner');
+                console.log("????????");
                 if(sum == 0){
                     let mn = creep.room.energyCapacityAvailable * 0.5;
                     if(mn > 800)
                         mn = 800;
                     const args = {
                         memory : {
-                            role : 'miner',
+                            role : 'miner_link',
                         },
-                        max_energy : 1000,
+                        max_energy : 1200,
                         min_energy : mn,
                     }
                     creep.room.memory.spawn_queue.push(args);

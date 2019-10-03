@@ -48,7 +48,7 @@ module.exports.loop = function () {
     //console.log(TESSSSSSSSSSSSSSSST);
     //console.log(Game.cpu.getUsed());
 
-    var spawn = Game.spawns['Spawn1'];
+    //var spawn = Game.spawns['Spawn1'];
 
     //Memory.army['lel'] = 1;
     // console.log(Memory.army['lel']);

@@ -78,7 +78,7 @@ module.exports = function(){
                 let target = this.memory.targetRoom;
                 Memory.military[unit_name] = {
                     target : target ? target : this.room.name,
-                    command : 'defend',
+                    command : 'free',
                     sleep : 0,
                     block_end : 0
                 }

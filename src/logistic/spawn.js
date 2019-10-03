@@ -94,7 +94,7 @@ module.exports = {
                 //console.log("am i firsT?");
                 let response = spawn_creep(spawn ,queue.data);
                 if(response == 0){
-                    console.log('spawning' , JSON.stringify(queue));
+                    console.log(room.name ,'spawning' , '??');
                     reinforcement.remove(queue.id);
                     return;
                 }
@@ -127,14 +127,16 @@ module.exports = {
                     console.log(room.energyAvailable, cap * 0.9);
                     return;
                 }
-                let creep_settings = get_queue_remote.get();
-                let args = {
-                    memory : creep_settings,
-                }
-                let response = spawn_creep(spawn, args);
-                if(response == 0){
-                    console.log('spawning' , JSON.stringify(creep_settings));
-                    return;
+                let creep_settings = get_queue_remote.get(room);
+                if(creep_settings){
+                    let args = {
+                        memory : creep_settings,
+                    }
+                    let response = spawn_creep(spawn, args);
+                    if(response == 0){
+                        console.log('spawning' , JSON.stringify(creep_settings));
+                        return;
+                    }
                 }
             }
         }  

@@ -1,17 +1,13 @@
-const roles = {
-    transferer : 8,
-    repairer : 4,
-    //builder : [3 , 4],
-    upgrader : 4,
-    //conqueror : 6,
-}
-const sr = ['harvester', 'upgrader'];
-
-const rooms = ['E48N29', 'E49N28' ]//, 'E48N28'];
+//Game.rooms['E47N29'].memory.remote = {}
+//Game.rooms['E47N29'].memory.remote.target = ['E48N29', 'E47N28', 'E46N29']
 
 module.exports = { 
 
-    get: function(){
+    /** @param {Room} home **/
+    get: function(home){
+        let rooms = home.memory.remote.target;
+        if(rooms.length == 0)
+            return;
 
         let hr = [];
         let ur = [];
@@ -21,10 +17,10 @@ module.exports = {
             let room = rooms[i];
             let harvesters = _.sum(Memory.creeps, (c) => c.targetRoom == room && c.role == 'harvester');
             hr.push(harvesters);
-            let upgraders = _.sum(Memory.creeps, (c) => c.targetRoom == room && c.role == 'upgrader');
-            ur.push(upgraders);
+            let builders = _.sum(Memory.creeps, (c) => c.targetRoom == room && c.role == 'builder');
+            ur.push(builders);
             
-            qt.push(upgraders + harvesters);
+            qt.push(builders + harvesters);
             //console.log('test ' + room);
         }
 
@@ -48,15 +44,14 @@ module.exports = {
             let response = outside_repairer_s(rooms[t]);
             if(response)
                 return response;
-            console.log(num);
             if(num > 4){
                 return;
             }
         }
 
-        if(hr[t] > ur[t]){
+        if(hr[t] > ur[t] && home.controller.level < 8){
             return {
-                role : 'upgrader',
+                role : 'builder',
                 targetRoom : rooms[t],
                 remote : true,
             }

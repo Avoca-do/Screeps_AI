@@ -2,12 +2,16 @@ module.exports = {
     /** @param {Creep} creep **/
     run : function(creep){
         let unit = creep.unit();
-        if(creep.room.name == unit.target){
+        let target = unit.target;
+        if(unit.command == 'free'){
+            let t = creep.memory.targetRoom;
+            target = t ? t : target;
+        }
+        if(creep.room.name == target){
             creep.memory.exit_pos = null;
             return true;
         }
-        
-        const route = Game.map.findRoute(creep.room, unit.target);
+        const route = Game.map.findRoute(creep.room, target);
         //console.log(creep.memory.targetRoom);
         //console.log(JSON.stringify(route[0]));
         if(route.length > 0){

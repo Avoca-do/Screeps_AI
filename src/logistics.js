@@ -2,6 +2,7 @@ const containers = require('./logistic.containers')
 
 const spawn_logistic = require('./logistic.spawn');
 const room_build = require('./logistic.buildings');
+const links = require('./logistic.base.links');
 
 const base = require('./logistic.room_planner.room_constractor')
 
@@ -14,6 +15,9 @@ const initRoom = function(room){
         room.memory.initialized = true;
         room.memory.miners = [ '', ''];
         room.memory.spawn_queue = [];
+        room.memory.remote = {};
+        room.memory.remote.target = [];
+        room.memory.links = {};
         
         console.log('initialazing room - ' + room.name);
     }
@@ -27,6 +31,7 @@ module.exports = {
             let room = Game.rooms[name];
             if(!room.controller.my)
                 continue;
+            links.run(room);
             initRoom(room);
             base.init(room);
             if(!room.memory.planner.disabled){ 

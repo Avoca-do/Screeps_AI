@@ -2,7 +2,7 @@ const body_types = {
     miner : { scalable : [WORK], movement : 0.14, fixed : [CARRY, CARRY],},
     transferer : { scalable : [CARRY], movement : 1, fixed : [],},
     normal : { scalable : [CARRY, WORK], movement : 1, fixed : [],},
-    remote : { scalable : [CARRY, CARRY, WORK], movement : 2, fixed : [],},
+    remote : { scalable : [CARRY, CARRY], movement : 1.5, fixed : [WORK, WORK, WORK, MOVE, MOVE, CARRY],},
 }
 
 const creeps = {
@@ -31,8 +31,6 @@ const SpawnCreature = (spawn, body, memory)=>{
             memory.home = spawn.room.name;
         }
         memory.task = 0; 
-
-        console.log(body, JSON.stringify(memory));
         return spawn.spawnCreep( body, name, {
             memory : memory
         });
@@ -43,13 +41,12 @@ const SpawnCreature = (spawn, body, memory)=>{
 
 /** @param {StructureSpawn} spawn **/
 module.exports = function(spawn ,args){
-    console.log(JSON.stringify(args));
+    //console.log(JSON.stringify(args));
     let creep_memory = args.memory;
     let body_type = creeps[creep_memory.role];
-    let mv = body_type[1];
     if(args.memory.remote){
         body_type = body_types.remote;
-        mv *= 3;
+        console.log(JSON.stringify(body_type));
     }
 
     let energy = spawn.room.energyAvailable;
@@ -69,6 +66,8 @@ module.exports = function(spawn ,args){
     if(response == 0){
         //console.log('spawning' , JSON.stringify(args));
         return response;
+    }else{
+        console.log(response, " - failed to spawn!");
     }
     return response;
 }
@@ -77,8 +76,8 @@ const createBody = (energy, body_configuration) => {
     let body = [];
     body_parts = body_configuration.scalable;
     moveRatio = body_configuration.movement;
+    let ac = bodyCost(body_configuration.fixed);
     if(moveRatio < 1){
-        let ac = bodyCost(body_configuration.fixed);
         let scost = bodyCost(body_parts);
         let mr = Math.floor((energy - 50 - ac) / scost);
         if(mr < 1)
@@ -97,17 +96,27 @@ const createBody = (energy, body_configuration) => {
         }
         body = body.concat(body_parts);
     }
-    body = body.concat(body_configuration.fixed);
     let cost = bodyCost(body);
     if(cost > energy){
         return body;
     }
-    let numDuplicate = Math.floor(energy / cost);
-    let ebody = [];
+    let max = Math.floor((50 - body_configuration.fixed.length) / body.length);
+    let numDuplicate = Math.floor((energy - ac) / cost);
+    let hm = false;
+    if(numDuplicate > max){
+        numDuplicate = max;
+        hm = true;
+    }
+    let ebody = body_configuration.fixed;
     for(let i = 0; i < numDuplicate; i++){
         ebody = ebody.concat(body);
     }
-    //console.log('createBody f', body, cost, energy, numDuplicate, bodyCost(ebody));
+    if(hm){
+        for(let i = body.length; i < 50; i++){
+            body.push(MOVE);
+        }
+    }
+    //console.log('createBody f', cost, energy, numDuplicate, bodyCost(ebody));
     ebody.sort();
     ebody = ebody.reverse();
     return ebody;

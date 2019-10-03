@@ -19,7 +19,7 @@ module.exports = {
             cap = 100;
         let container = creep.room.find(FIND_STRUCTURES, {
             filter : (s) => s.structureType == STRUCTURE_CONTAINER && s.store[RESOURCE_ENERGY] > cap
-            ||  s.structureType == STRUCTURE_LINK && s.energy > cap 
+            ||  s.structureType == STRUCTURE_LINK && s.energy > cap && s.getMemory().role
         })
         let source = creep.pos.findClosestByPath(container);
         if(!source){

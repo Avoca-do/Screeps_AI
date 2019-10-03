@@ -17,15 +17,22 @@ module.exports = {
                     // test = test.sort(function(a,b){return a - b});
                     // console.log(test);
 
-                    if(tower.energy < 700)
+                    if(tower.energy < 700){
+                        if(tower.energy > 400){
+                            let healc = room.find(FIND_MY_CREEPS, {
+                                filter : (c) => c.hits < c.hitsMax
+                            })
+                            tower.heal(healc[0]);
+                        }
                         continue;
+                    }
 
                     let utime = Game.time - tower.getMemory().rt;
                     let repairTarget = Game.getObjectById(tower.getMemory().tid);
                     if(!repairTarget || repairTarget.hits == repairTarget.hitsMax || utime > 20){
                         if(utime == 0 || utime > 7 || !utime){
                             repairTarget = tower.room.find(FIND_STRUCTURES, {
-                                filter : s => s.hits + 200 < s.hitsMax && s.hits < 30000
+                                filter : s => s.hits < s.hitsMax * 0.2 && s.hits < 30000
                             }).sort((s, s2) => s.hits - s2.hits);
                             //console.log(repairTarget[repairTarget.length - 1].hits);
                             if(repairTarget.length > 0){
@@ -44,6 +51,11 @@ module.exports = {
 
                     if(repairTarget){
                         tower.repair(repairTarget);
+                    }else{
+                        let healc = room.find(FIND_MY_CREEPS, {
+                            filter : (c) => c.hits < c.hitsMax
+                        })
+                        tower.heal(healc[0]);
                     }
 
                     //onsole.log(repairTarget + " . " + utime);

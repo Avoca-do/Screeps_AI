@@ -1,6 +1,19 @@
 module.exports = {
     run : function(creep){
         if(creep.room.name == creep.memory.targetRoom){
+            if(creep.pos.x == 49){
+                creep.move(LEFT)
+                return false;
+            }else if(creep.pos.y == 49){
+                creep.move(TOP);
+                return false;
+            }else if(creep.pos.x == 0){
+                creep.move(RIGHT);
+                return false;
+            }else if(creep.pos.y == 0){
+                creep.move(BOTTOM);
+                return false;
+            }
             creep.memory.exit_pos = null;
             return true;
         }
@@ -22,7 +35,8 @@ module.exports = {
                 plainCost: 2,
                 swampCost: 3,
             });
+            return false;
         }    
-        return false;
+        return true;
     }
 }

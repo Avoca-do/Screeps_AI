@@ -23,6 +23,11 @@ module.exports = {
     /** @param {Creep} creep **/
     transferRoom : function(creep, task){
         if(task == constants.HARVEST){
+            if(creep.hits < creep.hitsMax){
+                creep.memory.task = constants.WORK;
+                return;
+                //console.log("?!!", "iam under attack!", creep.name, creep.room.name);
+            }
             if(creep.run_task('travel_target')){
                 if(creep.run_task('harvest')){
                     creep.setTask(constants.WORK);
